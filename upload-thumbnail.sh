@@ -7,10 +7,11 @@ PNG="${1:?png path}"; SLUG="${2:?slug (lowercase-with-hyphens)}"
 REPO_DIR="$HOME/Documents/tub-connect-thumbnails"
 [[ "$SLUG" =~ ^[a-z0-9][a-z0-9-]*$ ]] || { echo "slug must be lowercase-with-hyphens" >&2; exit 1; }
 [[ -f "$PNG" ]] || { echo "no such file: $PNG" >&2; exit 1; }
+PNG="$(cd "$(dirname "$PNG")" && pwd)/$(basename "$PNG")"
 gh auth status >/dev/null 2>&1 || { echo "gh not logged in: run gh auth login" >&2; exit 1; }
 [[ -d "$REPO_DIR/.git" ]] || gh repo clone TheUncommonBusiness/tub-connect-thumbnails "$REPO_DIR" >&2
 cd "$REPO_DIR"
-git pull --rebase -q >&2
+git pull --rebase --autostash -q >&2
 cp "$PNG" "thumbnails/$SLUG.png"
 git add "thumbnails/$SLUG.png"
 if ! git diff --cached --quiet; then
